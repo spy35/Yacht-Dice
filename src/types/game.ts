@@ -27,3 +27,13 @@ export type GameRecord = {
     score: number;
     history: TurnSnapshot[]; // 1턴부터 10턴까지의 전체 기록
 };
+
+export type DuelRecord = {
+    id: string;
+    date: string;
+    playerSum: number;
+    computerSum: number;
+    playerDice: number[];
+    computerDice: number[];
+    result: 'WIN' | 'LOSE' | 'DRAW'; // 승, 패, 무 결과 상태
+};
