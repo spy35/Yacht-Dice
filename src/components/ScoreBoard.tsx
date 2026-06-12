@@ -1,4 +1,6 @@
 // src/components/ScoreBoard.tsx
+// ⭐️ 1. React에서 useMemo를 불러옵니다.
+import { useMemo } from 'react';
 import { Container, Table } from 'react-bootstrap';
 import type { CategoryType, DieType } from '../types/game';
 import { calculateScore } from '../utils/scoring';
@@ -8,16 +10,18 @@ type ScoreBoardProps = {
     dice: DieType[];
     rollsLeft: number;
     selectCategory: (categoryId: string, score: number) => void;
-    // ⭐️ 추가: 복기 전용 속성들
     isReviewMode?: boolean;
     highlightedCategory?: string;
 };
 
 const ScoreBoard = ({ categories, dice, rollsLeft, selectCategory, isReviewMode = false, highlightedCategory }: ScoreBoardProps) => {
-    // 복기 모드가 아닐 때만 주as위를 한 번이라도 굴렸는지 체크
     const isRolled = !isReviewMode && rollsLeft < 3;
 
-    const totalScore = categories.reduce((sum, cat) => sum + (cat.score !== null ? cat.score : 0), 0);
+    // ⭐️ 2. useMemo를 적용하여 성능 최적화!
+    // categories 배열이 변경될 때만 reduce 연산을 다시 수행합니다.
+    const totalScore = useMemo(() => {
+        return categories.reduce((sum, cat) => sum + (cat.score !== null ? cat.score : 0), 0);
+    }, [categories]); // 👈 의존성 배열에 categories를 넣음
 
     return (
         <Container className="border p-4 rounded bg-light shadow-sm" style={{ minHeight: '520px' }}>
@@ -33,23 +37,20 @@ const ScoreBoard = ({ categories, dice, rollsLeft, selectCategory, isReviewMode 
                     {categories.map(cat => {
                         const isLocked = cat.score !== null;
                         const potentialScore = (!isLocked && isRolled) ? calculateScore(cat.id, dice) : 0;
-
-                        // ⭐️ 스타일 분기 조건문 세팅
-                        const isThisTurnPick = isReviewMode && cat.id === highlightedCategory; // 이번 슬라이드에서 고른 족보인가?
+                        const isThisTurnPick = isReviewMode && cat.id === highlightedCategory;
 
                         let rowBgColor = 'inherit';
-                        if (isThisTurnPick) rowBgColor = '#c6efce'; // 복기 모드 픽 행은 부드러운 초록색 배경
-                        else if (isLocked && !isReviewMode) rowBgColor = '#e9ecef'; // 인게임 일반 잠금 행은 회색 배경
+                        if (isThisTurnPick) rowBgColor = '#c6efce';
+                        else if (isLocked && !isReviewMode) rowBgColor = '#e9ecef';
 
                         return (
                             <tr 
                                 key={cat.id} 
-                                // 복기 모드일 때는 클릭 이벤트를 원천 차단시킵니다.
                                 onClick={() => (!isLocked && isRolled && !isReviewMode) ? selectCategory(cat.id, potentialScore) : null}
                                 style={{ 
                                     cursor: (!isLocked && isRolled && !isReviewMode) ? 'pointer' : 'default',
                                     backgroundColor: rowBgColor,
-                                    border: isThisTurnPick ? '2.5px solid #2e7d32' : '1px solid #dee2e6' // 강조 테두리
+                                    border: isThisTurnPick ? '2.5px solid #2e7d32' : '1px solid #dee2e6'
                                 }}
                             >
                                 <td className={isThisTurnPick ? "fw-bold text-success fs-5" : isLocked ? "text-muted" : "fw-bold"}>
