@@ -15,7 +15,7 @@ const Header = ({ currentView, setView, openTutorial }: HeaderProps) => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 shadow-sm">
             <Container style={{ maxWidth: '1000px' }}>
-                <Navbar.Brand href="#home" className="fw-bold" onClick={() => setView('lobby')}>
+                <Navbar.Brand href="/" className="fw-bold" onClick={() => setView('lobby')}>
                     🎲 GAME HUB
                 </Navbar.Brand>
                 
